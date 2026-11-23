@@ -1,0 +1,148 @@
+"use client";
+
+import Link from "@/components/locale-link";
+import { useTranslation } from "@/i18n/context";
+import { Navbar } from "@/components/navbar";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Footer } from "@/components/footer";
+import { GlassCard } from "@/components/ui/glass-card";
+import { buttonClasses } from "@/components/ui/magnetic-button";
+import { HelpLink } from "@/components/help-sheet";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { FOUNDER_NAME, FOUNDER_NAME_AR } from "@/config/contact";
+import { stageOrder, stages, type StageSlug } from "@/data/stages";
+import { qaEntries } from "@/data/qa";
+import { WaitlistSignup } from "@/components/waitlist-signup";
+
+export default function StagePageClient({ slug }: { slug: StageSlug }) {
+  const { locale } = useTranslation();
+  const config = stages[slug];
+  const qaItems = qaEntries.filter((e) => config.qaIds.includes(e.id));
+
+  return (
+    <div className="relative min-h-screen">
+      <Navbar />
+      <Breadcrumb />
+      <main id="main-content" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          {/* Hero */}
+          <div className="text-center mb-12">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary mb-3">
+              {config.h1[locale]}
+            </h1>
+            <p className="text-text-secondary leading-relaxed max-w-xl mx-auto">
+              {config.intro[locale]}
+            </p>
+          </div>
+
+          {/* Free tools & guides */}
+          {config.tools.length > 0 && (
+            <section className="mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {config.tools.map((tool) => (
+                  <Link
+                    key={tool.href}
+                    href={tool.href}
+                    className="group flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl border border-border-subtle bg-surface/50 hover:border-brand/30 hover:bg-surface transition-colors"
+                  >
+                    <span className="text-sm font-medium text-text-primary">
+                      {tool.label[locale]}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-brand transition-colors rtl:rotate-180 shrink-0" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Relevant Q&A */}
+          {qaItems.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">
+                {locale === "ar" ? "أسئلة شائعة عن ده" : "Common questions at this stage"}
+              </h2>
+              <div className="space-y-3">
+                {qaItems.map((entry) => (
+                  <GlassCard key={entry.id} hoverEffect="border">
+                    <p className="text-sm font-semibold text-text-primary mb-1.5">
+                      {entry.q[locale]}
+                    </p>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {entry.a[locale]}
+                    </p>
+                  </GlassCard>
+                ))}
+              </div>
+              <div className="text-center mt-4">
+                <Link href="/qa" className="text-sm text-brand hover:text-brand/80 transition-colors">
+                  {locale === "ar" ? "شوف كل الأسئلة والأجوبة ←" : "See all Q&A →"}
+                </Link>
+              </div>
+            </section>
+          )}
+
+          {/* Paid next step */}
+          {config.paidService && (
+            <section>
+              <GlassCard hoverEffect="glow" className="text-center">
+                <Image src="/images/john.jpg" alt={locale === "ar" ? FOUNDER_NAME_AR : FOUNDER_NAME} width={56} height={56} sizes="56px" className="w-14 h-14 rounded-full object-cover mx-auto mb-3" />
+                <p className="text-xs text-text-muted mb-2">
+                  {locale === "ar" ? "لو لسه واقف عند ده" : "If you're still stuck here"}
+                </p>
+                <h2 className="text-xl font-bold text-text-primary mb-2">
+                  {config.paidService.title[locale]}
+                </h2>
+                <p className="text-sm text-brand font-medium mb-5">
+                  {config.paidService.stuckLine[locale]}
+                </p>
+                <HelpLink
+                  service={config.paidService.service}
+                  source={`stage:${config.slug}`}
+                  className={buttonClasses("primary", "lg")}
+                >
+                  {config.paidService.cta[locale]}
+                </HelpLink>
+                {config.paidService.postButton[locale] && (
+                  <p className="text-xs text-text-muted mt-3">
+                    {config.paidService.postButton[locale]}
+                  </p>
+                )}
+              </GlassCard>
+            </section>
+          )}
+
+          {config.waitlist && <WaitlistSignup className="mt-12" />}
+
+          {/* All five stages, so each stage page links the others (they were reachable only from the home page) */}
+          <nav aria-labelledby="all-stages" className="mt-12">
+            <h2 id="all-stages" className="text-base font-semibold text-text-primary mb-3">
+              {locale === "ar" ? "كل مراحل الرحلة" : "Every stage of the journey"}
+            </h2>
+            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {stageOrder.map((s, i) => (
+                <li key={s}>
+                  {s === slug ? (
+                    <span aria-current="step" className="flex items-center gap-3 px-4 py-3 rounded-xl border border-brand/40 bg-brand/5 text-sm font-medium text-text-primary">
+                      <span className="text-text-muted">{i + 1}</span>
+                      {stages[s].h1[locale]}
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/stage/${s}`}
+                      className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-border-subtle hover:border-brand/30 hover:bg-surface text-sm text-text-secondary hover:text-text-primary transition-colors"
+                    >
+                      <span className="text-text-muted">{i + 1}</span>
+                      {stages[s].h1[locale]}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

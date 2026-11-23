@@ -1,0 +1,1226 @@
+﻿"use client";
+
+import { useState } from "react";
+import { SiteImage } from "@/components/site-image";
+import type { ImageId } from "@/data/images";
+import { useTranslation } from "@/i18n/context";
+import { Navbar } from "@/components/navbar";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Footer } from "@/components/footer";
+import { GlassCard } from "@/components/ui/glass-card";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import Link from "@/components/locale-link";
+import { PAYMENT_LINKS, FACEBOOK_GROUP_URL, whatsappWithContext, COMMUNITY_SIZE, COMMUNITY_SIZE_AR, FOUNDER_NAME, FOUNDER_NAME_AR, REFUND_COPY } from "@/config/contact";
+import { price, priceOf, fullPackageTotal, eur, czk, OFFER_ACTIVE, type PriceKey } from "@/config/pricing";
+import { OfferBadge, PriceTag } from "@/components/launch-offer";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  CheckCircle2,
+  Phone,
+  FileSearch,
+  Mic,
+  MapPin,
+  Rocket,
+  Lightbulb,
+  AlertTriangle,
+  Target,
+  Home,
+  MessageCircle,
+  Lock,
+  ChevronDown,
+  Users,
+  Globe,
+  Shield,
+  ShieldAlert,
+  Star,
+  Award,
+  BookOpen,
+  Compass,
+  Calculator,
+  GraduationCap,
+  HelpCircle,
+  XCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+
+const services: {
+  key: "documentReview" | "consultation" | "interviewPrep" | "arrivalSupport" | "fullPackage";
+  icon: typeof FileSearch;
+  triggerIcon: typeof AlertTriangle;
+  priceKey: PriceKey;
+  paymentLink: string;
+  featured: boolean;
+}[] = [
+  { key: "documentReview", icon: FileSearch, triggerIcon: AlertTriangle, priceKey: "documentReview", paymentLink: PAYMENT_LINKS.documentReview, featured: false },
+  { key: "consultation", icon: Phone, triggerIcon: Lightbulb, priceKey: "consultation", paymentLink: PAYMENT_LINKS.consultation, featured: false },
+  { key: "interviewPrep", icon: Mic, triggerIcon: Target, priceKey: "interviewPrep", paymentLink: "/interview-prep", featured: false },
+  { key: "arrivalSupport", icon: MapPin, triggerIcon: Home, priceKey: "arrivalSupport", paymentLink: PAYMENT_LINKS.arrivalSupport, featured: false },
+  { key: "fullPackage", icon: Rocket, triggerIcon: Lightbulb, priceKey: "fullPackageStep1", paymentLink: PAYMENT_LINKS.fullPackageStep1, featured: true },
+];
+
+const freeResources = [
+  { icon: Compass, key: "matcher" as const },
+  { icon: BookOpen, key: "guide" as const },
+  { icon: Calculator, key: "costCalc" as const },
+  { icon: GraduationCap, key: "scholarships" as const },
+  { icon: BookOpen, key: "prepYear" as const },
+  { icon: HelpCircle, key: "qaBase" as const },
+  { icon: Users, key: "community" as const },
+];
+
+export default function ServicesClient() {
+  const { locale } = useTranslation();
+  const t = locale === "ar" ? ar : en;
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  return (
+    <div className="relative min-h-screen overflow-x-clip">
+      <Navbar />
+      <Breadcrumb />
+
+      <main id="main-content" className="pt-6 sm:pt-10 pb-20 px-4 sm:px-6 lg:px-8">
+        {/* SECTION 1: Hero */}
+        <section className="surface-ink max-w-4xl mx-auto text-center mb-8 sm:mb-16 relative rounded-3xl px-5 py-10 sm:px-12 sm:py-14 overflow-hidden">
+          {/* Photo band above the text: text on a photo can't be contrast-checked, text on the solid navy can. */}
+          <div aria-hidden="true" className="relative -mx-5 -mt-10 sm:-mx-12 sm:-mt-14 mb-8 h-32 sm:h-44 overflow-hidden">
+            <Image
+              src="/images/study/karolinum-graduation.jpg"
+              alt=""
+              fill
+              loading="eager"
+              fetchPriority="high"
+              className="object-cover object-top"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ink/20 to-ink" />
+          </div>
+          <div className="relative z-10 mb-5">
+            <OfferBadge locale={locale} />
+          </div>
+          <motion.h1
+            initial={{ y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-text-primary mb-5 relative z-10"
+          >
+            {t.hero.title}
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-text-secondary leading-relaxed max-w-2xl mx-auto mb-6 sm:mb-8 relative z-10"
+          >
+            {t.hero.subtitle}
+          </motion.p>
+
+          <motion.div
+            initial={{ y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6 sm:mb-8 relative z-10"
+          >
+            <MagneticButton
+              variant="primary"
+              size="lg"
+              href="#prices"
+              onClick={() => {
+                document.getElementById("paid-services")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              {t.hero.cta}
+            </MagneticButton>
+            <MagneticButton variant="secondary" size="lg" href={whatsappWithContext("your services")}>
+              <MessageCircle className="w-5 h-5" />
+              {t.hero.whatsappCta}
+            </MagneticButton>
+          </motion.div>
+
+          {/* Trust bar */}
+          <motion.div
+            initial={{ y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10"
+          >
+            {t.hero.trustBar.map((item, i) => {
+              const icons = [Users, Award, MapPin, Globe];
+              const Icon = icons[i] ?? Users;
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-surface/60 border border-border-subtle"
+                >
+                  <Icon className="w-4 h-4 text-brand shrink-0" />
+                  <span className="text-xs text-text-secondary leading-tight">{item}</span>
+                </div>
+              );
+            })}
+          </motion.div>
+        </section>
+
+        <PriceLadder locale={locale} />
+
+        {/* SECTION 2: Free vs Personal framing */}
+        <section className="max-w-2xl mx-auto mb-16">
+          <motion.div
+            initial={{ y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="motion-safe-fallback relative rounded-2xl border border-brand/20 bg-brand/[0.03] px-6 sm:px-8 py-7"
+          >
+            <div className="absolute top-4 start-4 text-4xl text-brand/20 font-serif leading-none select-none">&ldquo;</div>
+            <h2 className="text-lg font-semibold text-text-primary mb-4">{t.framing.title}</h2>
+            {t.framing.paragraphs.map((p, i) => (
+              <p key={i} className="text-sm text-text-secondary leading-relaxed mb-3 last:mb-0">
+                {p}
+              </p>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* How it works timeline */}
+        <section className="max-w-3xl mx-auto mb-16">
+          <h2 className="text-xl font-semibold text-text-primary text-center mb-8">
+            {t.howItWorks.title}
+          </h2>
+          <div className="relative">
+            <div className="absolute start-6 top-0 bottom-0 w-px bg-border-subtle hidden sm:block" />
+            {t.howItWorks.steps.map((step, i) => {
+              const stepIcons = [MessageCircle, CheckCircle2, Rocket];
+              const StepIcon = stepIcons[i] ?? CheckCircle2;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: i * 0.15 }}
+                  className="motion-safe-fallback relative flex items-start gap-4 sm:gap-6 mb-8 last:mb-0"
+                >
+                  <div className="relative z-10 w-12 h-12 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center shrink-0">
+                    <StepIcon className="w-5 h-5 text-brand" />
+                  </div>
+                  <div className="pt-1">
+                    <p className="text-xs text-brand font-medium mb-1">{step.label}</p>
+                    <h3 className="font-semibold text-text-primary mb-1">{step.title}</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed">{step.desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* SECTION 3: Free tier card */}
+        <section className="max-w-5xl mx-auto mb-12">
+          <motion.div
+            initial={{ y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="motion-safe-fallback"
+          >
+            <div className="rounded-2xl border border-dashed border-border-subtle bg-surface/40 p-6 sm:p-8">
+              <div className="flex items-start gap-4 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-white/5 border border-border-subtle flex items-center justify-center shrink-0">
+                  <BookOpen className="w-5 h-5 text-text-secondary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-text-primary text-lg">{t.freeTier.title}</h3>
+                  <p className="text-sm text-text-secondary">{t.freeTier.subtitle}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
+                {freeResources.map((res) => {
+                  const Icon = res.icon;
+                  return (
+                    <div key={res.key} className="flex items-start gap-2.5 text-sm text-text-secondary">
+                      <CheckCircle2 className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
+                      <span>{t.freeTier.items[res.key]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <MagneticButton variant="secondary" href="/qa">
+                {t.freeTier.cta}
+              </MagneticButton>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Price anchor block */}
+        <section className="max-w-2xl mx-auto mb-10">
+          <motion.div
+            initial={false}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="motion-safe-fallback text-center text-sm text-text-secondary"
+          >
+            <p className="font-semibold text-text-primary mb-1">{t.priceAnchor.bold}</p>
+            <p>{t.priceAnchor.sub}</p>
+          </motion.div>
+        </section>
+
+        {/* SECTION 4: Paid service cards */}
+        <section id="paid-services" className="max-w-5xl mx-auto mb-16 scroll-mt-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+            {services.slice(0, 3).map((svc, i) => (
+              <ServiceCard key={svc.key} svc={svc} t={t} index={i} locale={locale} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {services.slice(3).map((svc, i) => (
+              <ServiceCard key={svc.key} svc={svc} t={t} index={i + 3} locale={locale} />
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION: Transparency — What's included / NOT included */}
+        <section className="max-w-4xl mx-auto mb-16">
+          <h2 className="text-xl font-semibold text-text-primary text-center mb-2">
+            {t.transparency.title}
+          </h2>
+          <p className="text-sm text-text-secondary text-center mb-6">
+            {t.transparency.subtitle}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl border border-brand/30 bg-brand/[0.04] p-6">
+              <h3 className="flex items-center gap-2 font-semibold text-text-primary mb-4">
+                <CheckCircle2 className="w-5 h-5 text-brand" />
+                {t.transparency.includedTitle}
+              </h3>
+              <ul className="space-y-2">
+                {t.transparency.included.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-surface/60 p-6">
+              <h3 className="flex items-center gap-2 font-semibold text-text-primary mb-4">
+                <XCircle className="w-5 h-5 text-text-muted" />
+                {t.transparency.notIncludedTitle}
+              </h3>
+              <ul className="space-y-2">
+                {t.transparency.notIncluded.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                    <XCircle className="w-3.5 h-3.5 text-text-muted shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-border-subtle bg-surface/40 px-5 py-3">
+            <p className="text-xs text-text-muted text-center">{t.transparency.refund}</p>
+          </div>
+        </section>
+
+        {/* SECTION 5: About me */}
+        <section className="max-w-3xl mx-auto mb-16">
+          <motion.div
+            initial={{ y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            className="motion-safe-fallback"
+          >
+            <GlassCard hoverEffect="border" className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start">
+              <div className="w-[220px] h-[220px] rounded-2xl bg-white/5 border border-border-subtle flex items-center justify-center mx-auto md:mx-0 overflow-hidden ring-2 ring-brand/20 shadow-xl">
+                <Image
+                  src="/images/john.jpg"
+                  alt={`${FOUNDER_NAME}, founder of Study Czechia`}
+                  width={440}
+                  height={440}
+                  quality={90}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="w-16 h-16 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>';
+                  }}
+                />
+              </div>
+              <div>
+                {t.about.paragraphs.map((p, i) => (
+                  <p key={i} className="text-sm text-text-secondary leading-relaxed mb-3 last:mb-0">
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </GlassCard>
+          </motion.div>
+        </section>
+
+        {/* SECTION 6: Comparison table */}
+        <section className="max-w-4xl mx-auto mb-16">
+          <h2 className="text-xl font-semibold text-text-primary text-center mb-6">
+            {t.comparison.title}
+          </h2>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="text-start p-3 text-text-muted font-medium">
+                    <span className="sr-only">{t.comparison.aspectHeader}</span>
+                  </th>
+                  <th className="text-start p-3 text-text-secondary font-medium">{t.comparison.agencyHeader}</th>
+                  <th className="text-start p-3 text-brand font-semibold bg-brand/[0.04] rounded-t-xl border-t border-x border-brand/20">
+                    {t.comparison.usHeader}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {t.comparison.rows.map((row, i) => (
+                  <tr key={i} className="border-t border-border-subtle">
+                    <td className="p-3 text-text-secondary font-medium">{row.label}</td>
+                    <td className="p-3 text-text-muted">{row.agency}</td>
+                    <td className="p-3 text-text-primary bg-brand/[0.04] border-x border-brand/20 last:rounded-b-xl last:border-b">
+                      {row.us}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {t.comparison.rows.map((row, i) => (
+              <div key={i} className="rounded-xl border border-border-subtle bg-surface/60 p-4">
+                <p className="text-xs text-text-muted font-medium mb-2">{row.label}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-text-muted mb-1">{t.comparison.agencyHeader}</p>
+                    <p className="text-sm text-text-secondary">{row.agency}</p>
+                  </div>
+                  <div className="bg-brand/[0.04] rounded-lg p-2 border border-brand/20">
+                    <p className="text-xs text-brand mb-1">{t.comparison.usHeader}</p>
+                    <p className="text-sm text-text-primary">{row.us}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Community proof / testimonials section hidden until real, permission-granted testimonials exist. */}
+
+        {/* TODO: Hidden pending real, permission-granted testimonials — re-enable with <Testimonials /> */}
+
+        {/* Scam warning */}
+        <section className="max-w-4xl mx-auto mb-16">
+          <div className="flex items-start gap-3 rounded-2xl border border-brand/25 bg-brand/[0.06] px-5 py-4">
+            <ShieldAlert className="w-5 h-5 text-brand shrink-0 mt-0.5" />
+            <p className="text-sm text-text-secondary leading-relaxed">
+              {t.scamWarning}{" "}
+              <Link href="/questions-to-ask" className="font-medium text-brand hover:underline">
+                {t.agencyQuestions}
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        {/* SECTION 8: FAQ */}
+        <section className="max-w-2xl mx-auto mb-16">
+          <h2 className="text-xl font-semibold text-text-primary text-center mb-6">
+            {t.faq.title}
+          </h2>
+          <div className="space-y-2">
+            {t.faq.items.map((item, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-border-subtle bg-surface/60 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between gap-3 px-5 py-4 text-start"
+                >
+                  <span className="text-sm font-medium text-text-primary">{item.q}</span>
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 text-text-muted shrink-0 transition-transform duration-200",
+                      openFaq === i && "rotate-180"
+                    )}
+                  />
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-5 pb-4 text-sm text-text-secondary leading-relaxed">
+                        {item.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION 9: Final CTA */}
+        <section className="max-w-xl mx-auto text-center mb-8">
+          <h2 className="text-xl font-semibold text-text-primary mb-2">{t.finalCta.title}</h2>
+          <p className="text-sm text-text-secondary mb-5">{t.finalCta.subtitle}</p>
+          <MagneticButton variant="primary" size="lg" href={whatsappWithContext("getting started")}>
+            <MessageCircle className="w-5 h-5" />
+            {t.finalCta.button}
+          </MagneticButton>
+        </section>
+      </main>
+
+
+      <Footer />
+    </div>
+  );
+}
+
+/** A photo and colour per service, as static class strings. */
+const SERVICE_LOOK: Record<string, { photo: ImageId; fill: string; border: string }> = {
+  documentReview: { photo: "study-paperwork", fill: "bg-gold", border: "border-t-gold" },
+  consultation: { photo: "study-laptop-notes", fill: "bg-sky", border: "border-t-sky" },
+  interviewPrep: { photo: "study-class-hijab", fill: "bg-violet", border: "border-t-violet" },
+  arrivalSupport: { photo: "study-travel-map", fill: "bg-teal", border: "border-t-teal" },
+  fullPackage: { photo: "study-graduates-walking", fill: "bg-coral", border: "border-t-coral" },
+};
+
+function ServiceCard({
+  svc,
+  t,
+  index,
+  locale,
+}: {
+  svc: (typeof services)[number];
+  t: typeof en;
+  index: number;
+  locale: "en" | "ar";
+}) {
+  const content = t.services[svc.key];
+  const Icon = svc.icon;
+  const TriggerIcon = svc.triggerIcon;
+  const look = SERVICE_LOOK[svc.key];
+
+  return (
+    <motion.div
+      initial={{ y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ delay: index * 0.08, duration: 0.4 }}
+      className="motion-safe-fallback scroll-mt-24"
+      id={`svc-${svc.key}`}
+    >
+      <div
+        className={cn(
+          "card-lift relative rounded-2xl border border-t-4 bg-surface p-6 pt-0 h-full flex flex-col transition-shadow hover:shadow-lg",
+          look.border,
+          svc.featured
+            ? "border-brand/40 shadow-[0_0_30px_rgba(245,158,11,0.1)]"
+            : "border-border-subtle"
+        )}
+      >
+        {svc.featured && (
+          <div className="absolute -top-3 start-4 z-10 px-3 py-1 rounded-full bg-[#c8102e] text-white text-xs font-semibold shadow">
+            {t.bestValue}
+          </div>
+        )}
+
+        <div className="relative -mx-6 mb-5 h-40 overflow-hidden rounded-t-xl">
+          <SiteImage id={look.photo} sizes="(max-width: 768px) 100vw, 420px" whenNear decorative />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink/50 to-transparent" />
+        </div>
+        <div className="flex items-start gap-3 mb-3">
+          <div className={`-mt-11 w-12 h-12 rounded-xl ${look.fill} text-white ring-4 ring-surface shadow-md flex items-center justify-center shrink-0 relative`}>
+            <Icon className="w-5 h-5" aria-hidden="true" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-text-primary">{content.title}</h3>
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              {svc.key === "fullPackage" ? (
+                <>
+                  <span className="text-2xl font-bold text-brand" data-price-current data-price-regular-value={eur(fullPackageTotal(false), locale)}>
+                    {eur(fullPackageTotal(), locale)}
+                  </span>
+                  {OFFER_ACTIVE && (
+                    <s data-launch-offer className="text-sm text-text-muted">{eur(fullPackageTotal(false), locale)}</s>
+                  )}
+                </>
+              ) : (
+                <PriceTag k={svc.priceKey} locale={locale} className="text-2xl font-bold text-brand" />
+              )}
+              <span className="text-xs text-text-muted">
+                {svc.key === "fullPackage" ? t.twoStepsNote : czk(priceOf(svc.priceKey))}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-text-secondary italic mb-3">{content.stuckLine}</p>
+        <p className="text-sm text-text-secondary leading-relaxed mb-4">{content.description}</p>
+
+        <details className="group mb-4 flex-1">
+          <summary className="cursor-pointer list-none text-sm font-medium text-brand hover:underline mb-2">
+            {locale === "ar" ? `إيه اللي هتاخده (${content.included.length})` : `What's included (${content.included.length})`}
+          </summary>
+        <ul className="space-y-1.5 mb-4 flex-1">
+          {content.included.map((item, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+              <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+              <span className="text-xs">{item}</span>
+            </li>
+          ))}
+        </ul>
+        </details>
+
+        {svc.key === "fullPackage" && "paymentStructure" in content && (
+          <div className="rounded-xl bg-white/[0.03] border border-border-subtle p-3 mb-4">
+            <p className="text-xs font-medium text-text-primary mb-1">{content.paymentStructure?.header}</p>
+            {content.paymentStructure?.steps.map((step: string, i: number) => (
+              <p key={i} className="text-xs text-text-secondary">{step}</p>
+            ))}
+          </div>
+        )}
+
+        {svc.key === "fullPackage" && "bundledNote" in content && (
+          <p className="text-xs text-text-muted leading-relaxed mb-4">{content.bundledNote}</p>
+        )}
+
+        <div className="flex items-start gap-2 rounded-lg bg-brand/[0.04] border border-brand/15 px-3 py-2 mb-4">
+          <TriggerIcon className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+          <p className="text-xs text-text-secondary leading-relaxed">{content.triggerLine}</p>
+        </div>
+
+        <MagneticButton
+          variant="primary"
+          href={svc.paymentLink}
+          className="w-full"
+        >
+          {content.cta}
+        </MagneticButton>
+
+        <p className="text-center text-xs text-text-muted mt-2">{content.postButton}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Price ladder ───────────────────────────────────────────────────────────
+
+const LADDER_ORDER: (typeof services)[number]["key"][] = ["consultation", "documentReview", "arrivalSupport", "interviewPrep", "fullPackage"];
+
+const LADDER_COPY = {
+  en: {
+    title: "Prices",
+    subtitle: "Pick the one that fits where you are. Details for each are below.",
+    details: "Details",
+    names: {
+      consultation: "30-minute call",
+      documentReview: "Document review",
+      arrivalSupport: "Arrival plan",
+      interviewPrep: "Embassy mock interview",
+      fullPackage: "Full Journey",
+    },
+    bestFor: {
+      consultation: "You're stuck on one question and want a clear answer.",
+      documentReview: "Your documents are ready and you want them checked before you submit.",
+      arrivalSupport: "You have your visa and you're about to land.",
+      interviewPrep: "Your embassy interview is coming up.",
+      fullPackage: "You want someone with you from choosing a university to the visa.",
+    },
+    buy: "Book",
+    interviewBuy: "See how it works",
+  },
+  ar: {
+    title: "الأسعار",
+    subtitle: "اختار اللي يناسب المرحلة اللي أنت فيها. التفاصيل تحت.",
+    details: "التفاصيل",
+    names: {
+      consultation: "مكالمة 30 دقيقة",
+      documentReview: "مراجعة الأوراق",
+      arrivalSupport: "خطة الوصول",
+      interviewPrep: "مقابلة السفارة التجريبية",
+      fullPackage: "المرافقة الكاملة",
+    },
+    bestFor: {
+      consultation: "واقف عند سؤال واحد وعايز إجابة واضحة.",
+      documentReview: "أوراقك جاهزة وعايز حد يراجعها قبل ما تقدم.",
+      arrivalSupport: "خدت الفيزا وقربت تسافر.",
+      interviewPrep: "مقابلة السفارة قربت.",
+      fullPackage: "عايز حد معاك من اختيار الجامعة لحد الفيزا.",
+    },
+    buy: "احجز",
+    interviewBuy: "شوف التفاصيل",
+  },
+} as const;
+
+function PriceLadder({ locale }: { locale: "en" | "ar" }) {
+  const c = LADDER_COPY[locale];
+  return (
+    <section id="prices" className="max-w-3xl mx-auto mb-12 sm:mb-16 scroll-mt-24">
+      <h2 className="text-xl sm:text-2xl font-bold text-text-primary text-center mb-1">{c.title}</h2>
+      <p className="text-sm text-text-secondary text-center mb-5">{c.subtitle}</p>
+      <ol className="space-y-2.5">
+        {LADDER_ORDER.map((key) => {
+          const svc = services.find((s) => s.key === key)!;
+          const isFull = key === "fullPackage";
+          return (
+            <li
+              key={key}
+              className={cn(
+                "rounded-2xl border bg-surface/70 px-4 py-3 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 items-center",
+                isFull ? "border-brand/40" : "border-border-subtle"
+              )}
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-text-primary">{c.names[key]}</p>
+                <p className="text-xs text-text-secondary leading-snug mt-0.5">{c.bestFor[key]}</p>
+              </div>
+              <div className="text-end">
+                <PriceTag k={svc.priceKey} locale={locale} className="text-lg font-bold text-brand" regularClassName="text-xs" />
+                {isFull && (
+                  <p className="text-[11px] text-text-secondary leading-tight">
+                    {locale === "ar" ? `+ ${price("fullPackageStep2", "ar")} بعد القبول بس` : `+ ${price("fullPackageStep2")} only after acceptance`}
+                  </p>
+                )}
+              </div>
+              <div className="col-span-2 flex items-center gap-3 mt-1.5">
+                <MagneticButton variant="primary" size="sm" href={svc.paymentLink} className="flex-1">
+                  {key === "interviewPrep" ? c.interviewBuy : c.buy}
+                </MagneticButton>
+                <a href={`#svc-${key}`} className="text-xs text-brand hover:underline shrink-0">
+                  {c.details}
+                </a>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+// ─── English copy ───────────────────────────────────────────────────────────
+
+const en = {
+  hero: {
+    title: "Don't Let a Preventable Mistake Cost You a Year",
+    subtitle:
+      "Every year, students get rejected, not because they aren't qualified, but because of a document mistake, a wrong university choice, or an embassy interview they weren't ready for. I've been through the entire process myself. I can help you avoid what others learn the hard way.",
+    trustBar: [
+      `${COMMUNITY_SIZE} students in our community`,
+      "4 years answering students' questions",
+      "Based in Brno, Czech Republic",
+      "Egyptian student, been through it all",
+    ],
+    cta: "See Services & Pricing",
+    whatsappCta: "Ask Me First",
+  },
+  framing: {
+    title: "The Free Guides Answer the General Question. These Answer Yours.",
+    paragraphs: [
+      `Every guide, tool, and answer on this site is free, and stays free. The application guide, the programme matcher, the Q&A, the cost calculator, the community of ${COMMUNITY_SIZE} students, none of it is a teaser for something you have to pay to unlock.`,
+      "But a guide can only tell you what's generally true. It can't look at your transcript and tell you if your grades clear the bar. It can't read your specific document and tell you if that translation will pass. It can't sit with you before your embassy interview and tell you where your answer is weak. That's the part no guide, mine or anyone else's, can ever do.",
+      "That's what the services below are for: someone who's already done this, looking at your actual situation instead of the general case. Still a fraction of what agencies charge for worse, less personal help.",
+    ],
+  },
+  howItWorks: {
+    title: "How It Works",
+    steps: [
+      {
+        label: "Step 1",
+        title: "Message me on WhatsApp",
+        desc: "Tell me your situation: where you're from, what you've done so far, and what you need help with. I'll tell you honestly if you need a paid service or if the free guides are enough.",
+      },
+      {
+        label: "Step 2",
+        title: "Pick a service and pay securely",
+        desc: "Choose what fits your needs. Pay via Stripe (or InstaPay if you're in Egypt). I'll review your details before our session so we don't waste a single minute.",
+      },
+      {
+        label: "Step 3",
+        title: "Get personal guidance + follow-up",
+        desc: "We work through your specific situation together. After our session, you get a written summary and WhatsApp follow-up support so you're never stuck alone.",
+      },
+    ],
+  },
+  freeTier: {
+    title: "Do It Yourself: Free",
+    subtitle: "Most students start here. Many finish here too, and that's completely fine.",
+    items: {
+      matcher: "Programme Matcher: personalized recommendations in 2 minutes",
+      guide: "Full Application Guide: step-by-step, nothing hidden",
+      costCalc: "Cost of Living Calculator: Prague, Brno, Ostrava",
+      scholarships: "Scholarship Database: updated regularly",
+      prepYear: "Preparatory Year Guide: with real prices from real institutions",
+      qaBase: "Q&A Knowledge Base: visa, documents, housing, everything",
+      community: `Facebook Community: ${COMMUNITY_SIZE} students helping each other`,
+    },
+    cta: "Explore Free Resources →",
+  },
+  services: {
+    consultation: {
+      title: "Ask Me Anything: 30 Minutes",
+      stuckLine: "Stuck on one question you can't get a straight answer to? Ask me in a 30-minute call, and I'll tell you what I'd do in your place.",
+      description:
+        "A focused call about YOUR specific situation. Not generic advice. I'll look at what you're dealing with and tell you exactly what to do next. Most students book this when they're stuck on something specific, like which university to pick, whether their documents look right, or what to expect at the embassy.",
+      included: [
+        "30-minute video or voice call (your choice)",
+        "I review your situation before the call (send me details via WhatsApp)",
+        "Written summary after the call so you don't forget anything",
+        "48 hours of follow-up on WhatsApp for quick questions",
+        "Credited in full toward any larger service if you upgrade later",
+      ],
+      triggerLine:
+        "Not sure about one thing? Asking is usually faster than searching.",
+      cta: `Book a Call (${price("consultation")})`,
+      postButton: `🔒 Secure payment via Stripe · ${REFUND_COPY.en.perService.consultation}`,
+    },
+    documentReview: {
+      title: "Document Check: Before You Submit",
+      stuckLine:
+        "Stuck on the apostille or the translations? Send me your documents and I'll check every page before you submit.",
+      description:
+        `You send me everything you're planning to submit: university application, visa documents, translations, bank statements. I go through every page the way the embassy officer will and tell you what's wrong, what's missing, and what could get flagged. A ${price("documentReview")} review can save you from a rejection that costs you an entire semester.`,
+      included: [
+        "Full review of your complete document package",
+        "Detailed written report: what's correct, what needs fixing, what's missing",
+        "Priority checklist: fix these first, these can wait",
+        "Specific guidance on translations, apostilles, and formatting",
+        "One follow-up round: fix the issues, send back, I confirm you're good",
+      ],
+      triggerLine:
+        "It's much easier to fix a document before you submit it than after.",
+      cta: `Get My Documents Reviewed (${price("documentReview")})`,
+      postButton: `🔒 Secure payment via Stripe · ${REFUND_COPY.en.perService.documentReview}`,
+    },
+    interviewPrep: {
+      title: "Embassy interview: let's practise it first",
+      stuckLine: "Nervous about the embassy interview? Let's practise it together with the questions embassies ask, so nothing on the day surprises you.",
+      description:
+        "Embassy interviews follow a pattern. I know what they ask, what trips people up, and which answers actually work. We'll do a full mock interview together. I'll ask you the actual questions in the same order with the same follow-ups. Then I'll tell you exactly where you're weak and how to fix it. You'll walk into that interview knowing what's coming.",
+      included: [
+        "45-minute mock interview session (video call)",
+        "Real questions from real embassy interviews (updated regularly)",
+        "Feedback on your answers, body language, and confidence",
+        "Written cheat sheet: the 15 most common questions + ideal answers",
+        "Specific coaching on YOUR weak points",
+        "WhatsApp support until your interview date",
+      ],
+      triggerLine:
+        "Interview questions usually centre on your study plan: why this programme, why Czechia, how you'll pay. That's exactly what we practise.",
+      cta: `See How It Works (${price("interviewPrep")}) →`,
+      postButton: REFUND_COPY.en.perService.interviewPrep,
+    },
+    arrivalSupport: {
+      title: "Landed in Czechia? I've Got You.",
+      stuckLine:
+        "The first two weeks are a lot: foreign police, bank, insurance, transport, a SIM card, mostly in Czech. I'll give you a checklist for your city and answer your questions while you settle in.",
+      description:
+        "You just landed. You don't speak Czech. Every sign is confusing. You need to register at the foreign police within 3 days but you don't know where it is or what to bring. Your university sent you 4 emails in Czech and you have no idea what they say. I've been through all of this. I live here. I'll give you a complete first-week plan and be available on WhatsApp to answer every question you're afraid to ask.",
+      included: [
+        'Personalized "First 2 Weeks" checklist for your specific city',
+        "Foreign police registration walkthrough (what to bring, where to go)",
+        "Bank account setup guidance (which bank, what documents)",
+        "Czech SIM card recommendation (best plan for students)",
+        "Transport pass setup",
+        "Health insurance verification",
+        "14 days of WhatsApp support, ask me anything, anytime",
+      ],
+      triggerLine:
+        "You have 3 working days after arrival to report your address to the foreign police. I'll tell you where to go and what to bring.",
+      cta: `Get My Arrival Plan (${price("arrivalSupport")})`,
+      postButton: `🔒 Secure payment via Stripe · ${REFUND_COPY.en.perService.arrivalSupport}`,
+    },
+    fullPackage: {
+      title: "Full Journey: From Zero to Visa",
+      stuckLine:
+        "For students who don't want to figure it out alone. I'll be with you from your first question to your first day in Czechia.",
+      description:
+        "This is everything. We start from wherever you are, even if you haven't picked a country yet, and I walk you through every step until you have your visa and a plan for your first week. You're not buying a service. You're getting someone who's been through this, speaks your language, lives here, and will answer your WhatsApp at midnight when you're panicking about a deadline. Agencies often charge €1,500–€3,000. I'm in Brno, 20 minutes from the foreign police office.",
+      included: [
+        "University & program selection (based on your grades, budget, and goals)",
+        "Full document preparation guidance",
+        "Translation coordination (what needs apostille, what needs official translation, where to get it done right)",
+        "Complete visa application walkthrough",
+        "Embassy interview prep (mock interview included)",
+        "Housing guidance for your first months",
+        '"First Week in Czechia" plan: SIM card, bank account, transport pass, foreign police registration, insurance, everything',
+        "Direct WhatsApp access to me throughout the process",
+        "30 days of support after you arrive in Czechia",
+        '"Your First 90 Days in Czechia" course, included free',
+      ],
+      triggerLine:
+        "For when several things need work at once and you'd rather have one person with you for all of it.",
+      cta: `Start My Application (${price("fullPackageStep1")})`,
+      postButton: `🔒 Secure payment via Stripe · Also via InstaPay 🇪🇬 · ${REFUND_COPY.en.perService.fullPackage}`,
+      paymentStructure: {
+        header: "💳 Pay in 2 steps — the second only after you're accepted:",
+        steps: [
+          `Step 1: ${price("fullPackageStep1")} to start (university selection + document plan)`,
+          `Step 2: ${price("fullPackageStep2")}, only after a university accepts you. Not accepted? You never pay it.`,
+          `Total: ${eur(fullPackageTotal())}`,
+        ],
+      },
+      bundledNote: REFUND_COPY.en.bundledNote,
+    },
+  },
+  transparency: {
+    title: "Full Transparency: What You Get and What You Don't",
+    subtitle: "No surprises. Here's exactly what's included and what isn't.",
+    includedTitle: "What's Included",
+    included: [
+      "Direct WhatsApp access to me personally",
+      "Written summaries and checklists after every session",
+      "Follow-up support (duration depends on service)",
+      "Honest advice — I'll tell you if you don't need a paid service",
+      REFUND_COPY.en.inline,
+      "Access to the free resources forever",
+    ],
+    notIncludedTitle: "What's NOT Included",
+    notIncluded: [
+      "I don't submit applications on your behalf — you do it, I guide you",
+      "I can't guarantee a visa — no one can, anyone who promises that is lying",
+      "I don't provide official translations or apostille services",
+      "I'm not an agency — I'm one student helping you personally",
+      "I don't offer ongoing monthly support (except what's in your service plan)",
+      "I don't cover countries other than Czech Republic",
+    ],
+    refund: REFUND_COPY.en.footer,
+  },
+  about: {
+    paragraphs: [
+      `I'm ${FOUNDER_NAME}, an Egyptian student in my final year at Brno University of Technology. I went through the entire Czech university application process myself. The confusing research, the piles of documents, the stressful embassy interview, those first weeks of being completely lost in a country where I didn't speak the language.`,
+      `I started a Facebook group to answer questions for other Arabic-speaking students. It grew to ${COMMUNITY_SIZE} members. This website is the next step, putting everything I've learned into one place so you don't have to go through what I went through.`,
+      "The free resources are for everyone. The paid services are for students who want me personally in their corner.",
+    ],
+  },
+  comparison: {
+    title: "Why Students Choose Us Over Traditional Agencies",
+    aspectHeader: "What you get",
+    agencyHeader: "Typical Agency",
+    usHeader: "Study Czechia",
+    rows: [
+      { label: "Where they're based", agency: "Usually in your home country", us: "In Brno, Czech Republic, living here now" },
+      { label: "Their experience", agency: "Ask whether they've done it themselves", us: "Went through the entire process personally" },
+      { label: "Language", agency: "Usually Arabic", us: "Arabic, English, and Czech" },
+      { label: "Price for full support", agency: "Often €1,500 – €3,000", us: `${eur(fullPackageTotal())}, step 2 only after you're accepted` },
+      { label: "Free resources included", agency: "Usually few", us: "Full website, guides, tools, community" },
+      { label: "Post-arrival help", agency: "Often ends at the visa", us: "30 days of support after you land" },
+      { label: "Embassy interview prep", agency: "Often general tips", us: "Live mock interview with real questions" },
+      { label: "Refunds", agency: "Varies", us: REFUND_COPY.en.comparison },
+      { label: "Community", agency: "Varies", us: `Join ${COMMUNITY_SIZE} students helping each other` },
+    ],
+  },
+  communityProof: {
+    title: "Students Who Were in Your Exact Situation",
+    stats: [
+      { value: COMMUNITY_SIZE, label: "Students in our Facebook community helping each other daily" },
+      { value: "4 Years", label: "Answering the same questions — now all in one place" },
+      { value: `${price("consultation")}–${eur(fullPackageTotal())}`, label: "Vs. the €1,500–€3,000 agencies often charge" },
+    ],
+    cta: "See the community on Facebook →",
+  },
+  scamWarning:
+    "We never ask for payment through unofficial WhatsApp numbers or DMs claiming to be us. All paid services are booked through this website only.",
+  agencyQuestions: "Before you pay anyone, us included, ask these 8 questions",
+  faq: {
+    title: "Common Questions",
+    items: [
+      {
+        q: "Why should I pay when the guides are free?",
+        a: "The guides teach you the process. The services are me personally reviewing YOUR specific documents, YOUR specific situation, and answering YOUR specific questions. It's the difference between reading a medical textbook and seeing a doctor. The textbook is free. The doctor's time isn't.",
+      },
+      {
+        q: "How is this different from an agency?",
+        a: "Many agencies sell a package and stop once you have your visa. I live here and went through this myself, so I know which foreign police office is less crowded on Tuesdays and which dorm to avoid. And I cost a fraction of what agencies usually charge.",
+      },
+      {
+        q: "What if I pay and I'm not satisfied?",
+        a: REFUND_COPY.en.faq,
+      },
+      {
+        q: "Is it safe to pay online?",
+        a: "Payments are processed by Stripe, the same company that handles payments for Amazon, Google, and Shopify. I never see your card number. If you're in Egypt and prefer InstaPay, that works too, just message me on WhatsApp.",
+      },
+      {
+        q: "Can I just message you on WhatsApp for free?",
+        a: "Of course, and I answer questions in the Facebook group every day for free. But if you need me to spend 2 hours reviewing your documents or 45 minutes doing a mock interview, that's what the paid services are for. Quick questions? Always free. Deep personal work? That's the service.",
+      },
+      {
+        q: "I found a cheaper agency. Why not use them?",
+        a: "Ask them three questions: Have you personally been to Czechia? Can you do a mock embassy interview with real questions? Will you help me after I land? If the answer to any of these is no, you're paying for a middleman who Googles things for you.",
+      },
+      {
+        q: "What if my visa gets rejected even after using your service?",
+        a: "I help you build the strongest possible application, but I can't guarantee embassy decisions. Nobody can. Anyone who promises a 'guaranteed visa' is lying to you. What I can do is catch the mistakes that cause most rejections before you submit.",
+      },
+      {
+        q: "Why is the Full Journey paid in two steps?",
+        a: `Because your result matters more to me than the money. You pay ${price("fullPackageStep1")} to start. The second ${price("fullPackageStep2")} is only due after a university accepts you. If you're not accepted, you never pay it.`,
+      },
+    ],
+  },
+  priceAnchor: {
+    bold: "Agencies often charge €1,500–€3,000 for application support.",
+    sub: `Mine is ${eur(fullPackageTotal())}, and the second payment is only due after you're accepted. Not because it's less work, because I'm one student who lives here, not an office with overheads in four cities.`,
+  },
+  securityNotice:
+    "We never ask for payment through unofficial WhatsApp numbers or DMs claiming to be us. All paid services are booked through this website only.",
+  finalCta: {
+    title: "Not sure where to start?",
+    subtitle:
+      "Message me on WhatsApp. Tell me your situation. I'll tell you honestly whether you need a paid service or if the free guides are enough.",
+    button: "Message on WhatsApp",
+  },
+  bestValue: "Best Value",
+  twoStepsNote: `${price("fullPackageStep1")} now, ${price("fullPackageStep2")} after acceptance`,
+  whatsappTooltip: "Not sure which service? Ask me, no pressure.",
+};
+
+// ─── Arabic copy ────────────────────────────────────────────────────────────
+
+const ar: typeof en = {
+  hero: {
+    title: "ماتخليش غلطة ممكن تتفاديها تكلفك سنة كاملة",
+    subtitle:
+      "كل سنة، طلاب بيترفضوا. مش عشان مش مؤهلين، بس عشان غلطة في ورقة، أو اختيار جامعة غلط، أو مقابلة سفارة ماكانوش جاهزين ليها. أنا عديت العملية كلها بنفسي. أقدر أساعدك تتفادى اللي غيرك اتعلموه بالطريقة الصعبة.",
+    trustBar: [
+      `أكتر من ${COMMUNITY_SIZE_AR} طالب في مجتمعنا`,
+      "4 سنين بجاوب على أسئلة الطلاب",
+      "مقيم في برنو، جمهورية التشيك",
+      "طالب مصري، عديت التجربة كلها",
+    ],
+    cta: "شوف الخدمات والأسعار",
+    whatsappCta: "اسألني الأول",
+  },
+  framing: {
+    title: "الأدلة المجانية بتجاوب على السؤال العام. أنا بجاوب على سؤالك إنت.",
+    paragraphs: [
+      `كل دليل وأداة وإجابة في الموقع ده مجانية، وهتفضل مجانية. دليل التقديم، مطابقة البرامج، الأسئلة والأجوبة، حاسبة التكاليف، وجروب الفيسبوك اللي فيه أكتر من ${COMMUNITY_SIZE_AR} عضو. مفيش حاجة فيهم مجرد إعلان لحاجة هتدفع عشان تفتحها.`,
+      "بس الدليل بيقولك إيه اللي صح بشكل عام بس. مش يقدر يبص على مجموعك إنت ويقولك لو بيكفي. مش يقدر يقرا ورقتك إنت ويقولك لو الترجمة دي هتتقبل. مش يقدر يقعد معاك إنت قبل مقابلتك إنت ويقولك فين إجابتك ضعيفة. ده الجزء اللي مفيش دليل، مني ولا من حد تاني، هيقدر يعمله أبدًا.",
+      "ده اللي الخدمات تحت دي عشانه: حد عدى التجربة دي فعلاً، بيبص على وضعك إنت الحقيقي مش الحالة العامة. وبرضو جزء صغير من اللي المكاتب بتاخده على مساعدة أقل وأقل شخصية.",
+    ],
+  },
+  howItWorks: {
+    title: "إزاي بتشتغل",
+    steps: [
+      {
+        label: "الخطوة 1",
+        title: "راسلني على واتساب",
+        desc: "قولي وضعك: أنت منين، عملت إيه لحد دلوقتي، ومحتاج مساعدة في إيه. هقولك بصراحة لو محتاج خدمة مدفوعة ولا الأدلة المجانية كفاية.",
+      },
+      {
+        label: "الخطوة 2",
+        title: "اختار خدمة وادفع بأمان",
+        desc: "اختار اللي يناسبك. ادفع عبر Stripe (أو InstaPay لو في مصر). هراجع تفاصيلك قبل جلستنا عشان مانضيعش دقيقة.",
+      },
+      {
+        label: "الخطوة 3",
+        title: "احصل على توجيه شخصي + متابعة",
+        desc: "بنشتغل على وضعك أنت تحديدًا مع بعض. بعد الجلسة بتاخد ملخص مكتوب ودعم متابعة على واتساب عشان عمرك ماتكون لوحدك.",
+      },
+    ],
+  },
+  freeTier: {
+    title: "اعملها بنفسك: مجانًا",
+    subtitle: "معظم الطلاب بيبدأوا هنا. وكتير بيخلصوا هنا كمان. وده تمام خالص.",
+    items: {
+      matcher: "اختيار الجامعة: ترشيحات مخصصة في دقيقتين",
+      guide: "دليل التقديم الكامل: خطوة بخطوة، مفيش حاجة مخبية",
+      costCalc: "حاسبة تكاليف المعيشة: براغ، برنو، أوسترافا",
+      scholarships: "قاعدة بيانات المنح: بتتحدث بانتظام",
+      prepYear: "دليل السنة التحضيرية: بأسعار حقيقية من مؤسسات حقيقية",
+      qaBase: "أسئلة وأجوبة: فيزا، أوراق، سكن، كل حاجة",
+      community: `جروب الفيسبوك: أكتر من ${COMMUNITY_SIZE_AR} طالب بيساعدوا بعض`,
+    },
+    cta: "استكشف الموارد المجانية →",
+  },
+  services: {
+    consultation: {
+      title: "اسألني أي حاجة: 30 دقيقة",
+      stuckLine: "واقف عند سؤال مش لاقيله إجابة واضحة؟ اسألني في مكالمة 30 دقيقة، وهقولك أنا كنت هعمل إيه مكانك.",
+      description: "مكالمة مركزة عن وضعك أنت تحديدًا. مش نصايح عامة. هبص على وضعك وهقولك بالظبط تعمل إيه. معظم الطلاب بيحجزوا لما بيكونوا واقفين عند حاجة معينة.",
+      included: [
+        "مكالمة فيديو أو صوت 30 دقيقة (اختيارك)",
+        "براجع وضعك قبل المكالمة (ابعتلي التفاصيل على واتساب)",
+        "ملخص مكتوب بعد المكالمة. عشان ماتنساش حاجة",
+        "48 ساعة متابعة على واتساب لأسئلة سريعة",
+        "بتتحسب بالكامل لو حجزت خدمة أكبر بعدين",
+      ],
+      triggerLine: "مش متأكد من حاجة واحدة؟ السؤال غالبًا أسرع من البحث.",
+      cta: `احجز مكالمة (${price("consultation", "ar")})`,
+      postButton: `🔒 دفع آمن عبر Stripe · ${REFUND_COPY.ar.perService.consultation}`,
+    },
+    documentReview: {
+      title: "مراجعة الأوراق: قبل ما تقدم",
+      stuckLine: "واقف عند الأبوستيل أو الترجمة؟ ابعتلي أوراقك وأنا أراجع كل صفحة قبل ما تقدم.",
+      description: `ابعتلي كل حاجة ناوي تقدمها. طلب الجامعة، أوراق الفيزا، الترجمات، كشف الحساب. براجع كل صفحة زي ما موظف السفارة هيعمل. مراجعة بـ ${price("documentReview", "ar")} ممكن تنقذك من رفض بيكلفك فصل كامل.`,
+      included: [
+        "مراجعة كاملة لكل الأوراق",
+        "تقرير مكتوب مفصل: الصحيح، اللي محتاج تعديل، الناقص",
+        "قائمة أولويات: صلح دول الأول، دول يستنوا",
+        "توجيه خاص للترجمات والابوستيل والتنسيق",
+        "جولة متابعة: صلح المشاكل، ابعت تاني، بأكدلك إن كله تمام",
+      ],
+      triggerLine: 'تصليح الورقة قبل ما تقدمها أسهل بكتير من بعدها.',
+      cta: `راجع أوراقي (${price("documentReview", "ar")})`,
+      postButton: `🔒 دفع آمن عبر Stripe · ${REFUND_COPY.ar.perService.documentReview}`,
+    },
+    interviewPrep: {
+      title: "مقابلة السفارة: نتدرب عليها الأول",
+      stuckLine: "قلقان من مقابلة السفارة؟ يلا نتدرب عليها مع بعض بالأسئلة اللي السفارات بتسألها، عشان مافيش حاجة تفاجئك يومها.",
+      description: "مقابلات السفارة ليها نمط ثابت. بعرف الأسئلة والفخاخ والإجابات الصح. هنعمل مقابلة تجريبية كاملة مع بعض. هتدخل المقابلة وأنت عارف ايه الجاي.",
+      included: [
+        "جلسة مقابلة تجريبية 45 دقيقة (فيديو)",
+        "أسئلة حقيقية من مقابلات سفارة حقيقية",
+        "تعليق على إجاباتك ولغة جسدك وثقتك",
+        "ورقة مكتوبة: أكتر 15 سؤال شائع + الإجابات المثالية",
+        "تدريب خاص على نقاط ضعفك أنت",
+        "دعم واتساب لحد موعد مقابلتك",
+      ],
+      triggerLine: "أسئلة المقابلة غالبًا بتدور حوالين خطتك الدراسية: ليه البرنامج ده، ليه التشيك، وهتصرف إزاي. وده بالظبط اللي هنتدرب عليه.",
+      cta: `شوف التفاصيل (${price("interviewPrep", "ar")}) →`,
+      postButton: REFUND_COPY.ar.perService.interviewPrep,
+    },
+    arrivalSupport: {
+      title: "وصلت التشيك؟ أنا معاك.",
+      stuckLine: "أول أسبوعين فيهم حاجات كتير: شرطة الأجانب، البنك، التأمين، المواصلات، الشريحة، ومعظمها بالتشيكي. هديك قائمة لمدينتك وهرد على أسئلتك وأنت بتستقر.",
+      description: "لسه واصل. مش بتتكلم تشيكي. كل لافتة محيرة. أنا عديت كل ده. أنا ساكن هنا. هديك خطة كاملة لأول أسبوع وهكون متاح على واتساب أجاوب على كل سؤال.",
+      included: [
+        `قائمة "أول أسبوعين" مخصصة لمدينتك`,
+        "شرح تسجيل شرطة الأجانب (إيه تجيب، تروح فين)",
+        "توجيه فتح حساب بنكي (أي بنك، أي أوراق)",
+        "توصية شريحة موبايل (أحسن باقة للطلاب)",
+        "إعداد اشتراك المواصلات",
+        "تحقق من التأمين الصحي",
+        "14 يوم دعم واتساب. اسأل أي حاجة، في أي وقت",
+      ],
+      triggerLine: "قدامك 3 أيام عمل بعد وصولك تبلّغ شرطة الأجانب بعنوانك (أيام عمل، مش أيام عادية). السكن الجامعي والفنادق غالبًا بيعملوها بدالك.",
+      cta: `احصل على خطة وصولي (${price("arrivalSupport", "ar")})`,
+      postButton: `🔒 دفع آمن عبر Stripe · ${REFUND_COPY.ar.perService.arrivalSupport}`,
+    },
+    fullPackage: {
+      title: "الرحلة الكاملة: من الصفر للفيزا",
+      stuckLine: "للطلاب اللي مش عايزين يعملوها لوحدهم. هكون معاك من أول سؤال لأول يوم في التشيك.",
+      description: "ده كل حاجة. بنبدأ من أي مكان أنت فيه، حتى لو لسه مااخترتش بلد، وبمشي معاك كل خطوة لحد ما تاخد الفيزا. مش بتشتري خدمة. بتجيب شخص عدى التجربة، بيتكلم لغتك وساكن هنا. المكاتب غالبًا بتاخد 1,500€–3,000€. أنا في برنو، 20 دقيقة من شرطة الأجانب.",
+      included: [
+        "اختيار الجامعة والتخصص (حسب درجاتك وميزانيتك وأهدافك)",
+        "توجيه كامل لتجهيز الأوراق",
+        "تنسيق الترجمات (إيه محتاج ابوستيل، إيه محتاج ترجمة رسمية)",
+        "شرح كامل لطلب الفيزا",
+        "تجهيز مقابلة السفارة (مقابلة تجريبية متضمنة)",
+        "توجيه سكن لأول شهور",
+        `خطة "أول أسبوع": شريحة، بنك، مواصلات، شرطة الأجانب، تأمين. كل حاجة`,
+        "تواصل مباشر معايا على واتساب طول العملية",
+        "30 يوم دعم بعد وصولك التشيك",
+        `كورس "أول 90 يوم في التشيك". مجانًا`,
+      ],
+      triggerLine: "لما يكون في كذا حاجة محتاجة شغل في نفس الوقت، وتحب يكون معاك شخص واحد في كل ده.",
+      cta: `ابدأ طلبي (${price("fullPackageStep1", "ar")})`,
+      postButton: `🔒 دفع آمن عبر Stripe · متاح كمان بـ InstaPay 🇪🇬 · ${REFUND_COPY.ar.perService.fullPackage}`,
+      paymentStructure: {
+        header: "💳 ادفع على خطوتين — التانية بعد قبولك بس:",
+        steps: [
+          `الخطوة 1: ${price("fullPackageStep1", "ar")} عشان نبدأ (اختيار الجامعة + خطة الأوراق)`,
+          `الخطوة 2: ${price("fullPackageStep2", "ar")}، بعد ما جامعة تقبلك بس. لو ماتقبلتش، مش هتدفعها خالص.`,
+          `الإجمالي: ${eur(fullPackageTotal(), "ar")}`,
+        ],
+      },
+      bundledNote: REFUND_COPY.ar.bundledNote,
+    },
+  },
+  transparency: {
+    title: "شفافية كاملة: إيه اللي بتاخده وإيه لأ",
+    subtitle: "بدون مفاجآت. ده بالظبط إيه المتضمن وإيه مش متضمن.",
+    includedTitle: "المتضمن",
+    included: [
+      "تواصل مباشر معايا على واتساب",
+      "ملخصات مكتوبة وقوائم بعد كل جلسة",
+      "دعم متابعة (المدة حسب الخدمة)",
+      "نصيحة صادقة — هقولك لو مش محتاج خدمة مدفوعة",
+      REFUND_COPY.ar.inline,
+      "وصول للموارد المجانية للأبد",
+    ],
+    notIncludedTitle: "مش متضمن",
+    notIncluded: [
+      "مش بقدم الطلبات بدلك — أنت بتعملها، أنا بوجهك",
+      "مش بضمن الفيزا — محدش يقدر. أي حد يوعدك بده بيكدب",
+      "مش بعمل ترجمات رسمية أو ابوستيل",
+      "أنا مش مكتب — أنا طالب واحد بيساعدك شخصيًا",
+      "مفيش دعم شهري مستمر (غير اللي في خطة خدمتك)",
+      "مش بغطي بلاد غير جمهورية التشيك",
+    ],
+    refund: REFUND_COPY.ar.footer,
+  },
+  about: {
+    paragraphs: [
+      `أنا ${FOUNDER_NAME_AR}، طالب مصري في السنة الأخيرة في جامعة برنو التقنية. عديت عملية التقديم للجامعات التشيكية كلها بنفسي. البحث المحير، فوضى الأوراق، ضغط مقابلة السفارة، أول أسابيع ضايع تمامًا في بلد مابعرفش لغته.`,
+      `بدأت جروب فيسبوك عشان أجاوب على أسئلة الطلاب العرب. كبر لأكتر من ${COMMUNITY_SIZE_AR} عضو. الموقع ده الخطوة التالية. كل اللي اتعلمته في مكان واحد عشان ماتعديش اللي أنا عديته.`,
+      "الموارد المجانية للجميع. الخدمات المدفوعة للطلاب اللي عايزيني أنا شخصيًا في جانبهم.",
+    ],
+  },
+  comparison: {
+    title: "ليه الطلاب بيختارونا عن المكاتب التقليدية",
+    aspectHeader: "اللي بتاخده",
+    agencyHeader: "وكالة عادية",
+    usHeader: "Study Czechia",
+    rows: [
+      { label: "مكانهم", agency: "غالبًا في بلدك", us: "في برنو، التشيك. ساكن هنا دلوقتي" },
+      { label: "خبرتهم", agency: "اسألهم لو عدوا التجربة بنفسهم", us: "عديت العملية كلها بنفسي" },
+      { label: "اللغة", agency: "غالبًا عربي", us: "عربي، إنجليزي، وتشيكي" },
+      { label: "سعر الدعم الكامل", agency: "غالبًا 1,500€ – 3,000€", us: `${eur(fullPackageTotal(), "ar")}، الدفعة التانية بعد قبولك بس` },
+      { label: "موارد مجانية", agency: "غالبًا قليلة", us: "موقع كامل، أدلة، أدوات، مجتمع" },
+      { label: "دعم بعد الوصول", agency: "غالبًا بيخلص عند الفيزا", us: "30 يوم دعم بعد وصولك" },
+      { label: "تجهيز مقابلة السفارة", agency: "غالبًا نصايح عامة", us: "مقابلة تجريبية حية بأسئلة حقيقية" },
+      { label: "استرداد", agency: "بيختلف", us: REFUND_COPY.ar.comparison },
+      { label: "المجتمع", agency: "بيختلف", us: `انضم لأكتر من ${COMMUNITY_SIZE_AR} طالب بيساعدوا بعض` },
+    ],
+  },
+  communityProof: {
+    title: "طلاب كانوا في نفس موقفك بالظبط",
+    stats: [
+      { value: `${COMMUNITY_SIZE_AR}+`, label: "طالب في مجتمعنا على فيسبوك بيساعدوا بعض يوميًا" },
+      { value: "4 سنين", label: "بجاوب على نفس الأسئلة — دلوقتي كلها في مكان واحد" },
+      { value: `${price("consultation", "ar")}–${eur(fullPackageTotal(), "ar")}`, label: "مقابل 1,500€–3,000€ اللي المكاتب غالبًا بتاخدها" },
+    ],
+    cta: "شوف المجتمع على فيسبوك →",
+  },
+  scamWarning: "إحنا مش بنطلب فلوس على أي رقم واتساب غير رسمي أو رسايل خاصة بتدعي إنها منّا. كل الخدمات المدفوعة بتتحجز من الموقع ده بس.",
+  agencyQuestions: "قبل ما تدفع لأي حد، حتى لينا، اسأل الـ8 أسئلة دول",
+  faq: {
+    title: "أسئلة شائعة",
+    items: [
+      { q: "ليه أدفع والأدلة مجانية؟", a: "الأدلة بتعلمك العملية. الخدمات هي أنا شخصيًا براجع أوراقك أنت ووضعك أنت وبجاوب أسئلتك أنت. الفرق بين إنك تقرأ كتاب طب وإنك تروح لدكتور." },
+      { q: "إيه الفرق بينكم وبين مكتب؟", a: "مكاتب كتير بتبيعلك باكيج وشغلها بيخلص لما تاخد الفيزا. أنا ساكن هنا وعديت التجربة بنفسي. وبكلف جزء صغير من اللي المكاتب غالبًا بتاخده." },
+      { q: "لو دفعت ومش راضي؟", a: REFUND_COPY.ar.faq },
+      { q: "الدفع أونلاين آمن؟", a: "المدفوعات بتتعالج عن طريق Stripe. نفس الشركة اللي بتشتغل مع Amazon و Google. مش بشوف رقم كارتك. لو في مصر وتفضل InstaPay، برضو تمام. راسلني على واتساب." },
+      { q: "أقدر أراسلك على واتساب بلاش؟", a: "طبعًا. وبجاوب أسئلة في جروب الفيسبوك كل يوم بالمجان. بس لو محتاج ساعتين مراجعة أوراق أو 45 دقيقة مقابلة تجريبية، ده اللي الخدمات عشانه." },
+      { q: "لقيت مكتب أرخص. ليه ماستخدمهمش؟", a: "اسألهم 3 أسئلة: راحوا التشيك قبل كده؟ يقدروا يعملوا مقابلة تجريبية بأسئلة حقيقية؟ هيساعدوك بعد ما توصل؟ لو الإجابة لأ على أي واحد، بتدفع لوسيط بيعملك Google." },
+      { q: "لو الفيزا اترفضت رغم الخدمة؟", a: `بساعدك تبني أقوى طلب ممكن، بس مش بضمن قرارات السفارة. محدش يقدر. أي حد يوعدك ب"فيزا مضمونة" بيكدب عليك. اللي أقدر أعمله إني أمسك الأخطاء اللي بتسبب معظم الرفض قبل ما تقدم.` },
+      { q: "ليه الرحلة الكاملة بتتدفع على خطوتين؟", a: `عشان نتيجتك تهمني أكتر من الفلوس. بتدفع ${price("fullPackageStep1", "ar")} عشان نبدأ، والـ${price("fullPackageStep2", "ar")} التانيين مش بتدفعهم غير بعد ما جامعة تقبلك. لو ماتقبلتش، مش هتدفعهم خالص.` },
+    ],
+  },
+  priceAnchor: {
+    bold: "المكاتب غالبًا بتاخد 1,500€–3,000€ على دعم التقديم.",
+    sub: `عندي ${eur(fullPackageTotal(), "ar")}، والدفعة التانية بعد قبولك بس. مش عشان الشغل أقل، عشان أنا طالب عايش هنا، مش مكتب بمصاريف في 4 مدن.`,
+  },
+  securityNotice:
+    "احنا عمرنا ما بنطلب دفع من خلال ارقام واتساب غير رسمية او رسائل بتدعي انها مننا. كل الخدمات المدفوعة بتتحجز من الموقع ده بس.",
+  finalCta: {
+    title: "مش متأكد تبدأ منين؟",
+    subtitle: "راسلني على واتساب. قولي وضعك. هقولك بصراحة لو محتاج خدمة مدفوعة ولا الأدلة المجانية كفاية.",
+    button: "راسل على واتساب",
+  },
+  bestValue: "الأفضل قيمة",
+  twoStepsNote: `${price("fullPackageStep1", "ar")} دلوقتي، و${price("fullPackageStep2", "ar")} بعد القبول`,
+  whatsappTooltip: "مش متأكد من أي خدمة؟ اسألني. من غير ضغط.",
+};

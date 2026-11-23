@@ -1,0 +1,646 @@
+@import "tailwindcss";
+
+/* dark: utilities follow the theme toggle, not the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Design tokens. Light is the default theme; dark is opt-in through the
+ * theme toggle ([data-theme="dark"]). Names describe the role, not the
+ * colour: "bg" is the page background, "brand" the Czech blue from the logo,
+ * "accent-red" the Czech red and "ink" the fixed navy behind photos.
+ */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f5f7fa;
+  --color-bg-muted: #e9edf3;
+  --color-brand: #11457e;
+  --color-brand-hover: #0c3563;
+  --color-brand-light: #2d64a5;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f5f7fa;
+  --color-surface-raised: #eef2f7;
+  --color-border-subtle: #e2e7ee;
+  --color-border-accent: rgba(17, 69, 126, 0.35);
+  --color-text-primary: #0b1f3a;
+  --color-text-secondary: #3d4a5f;
+  --color-text-muted: #5b677a;
+  --color-success: #166534;
+  --color-info: #1d4ed8;
+  --color-accent: #11457e;
+  --color-warning: #a16207;
+  --color-error: #b91c1c;
+  --color-accent-red: #c8102e;
+  --color-ink: #0b1f3a;
+  /* Accent families: fill (icons, bars), soft (tinted backgrounds), ink
+     (text on soft, AA or better). Use them to give each tool and stage its
+     own colour; brand blue and Czech red stay the identity. */
+  --color-teal: #0d9488;
+  --color-teal-soft: #ccfbf1;
+  --color-teal-ink: #115e59;
+  --color-violet: #7c3aed;
+  --color-violet-soft: #ede9fe;
+  --color-violet-ink: #5b21b6;
+  --color-gold: #f59e0b;
+  --color-gold-soft: #fef3c7;
+  --color-gold-ink: #92400e;
+  --color-coral: #f97316;
+  --color-coral-soft: #ffedd5;
+  --color-coral-ink: #9a3412;
+  --color-sky: #0ea5e9;
+  --color-sky-soft: #e0f2fe;
+  --color-sky-ink: #075985;
+  --color-rose: #e11d48;
+  --color-rose-soft: #ffe4e6;
+  --color-rose-ink: #9f1239;
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-zen-antique), Georgia, "Times New Roman", serif;
+  --font-display-ar: var(--font-lalezar), var(--font-plex-arabic), "Segoe UI", Tahoma, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+  --font-arabic: var(--font-plex-arabic), "Segoe UI", Tahoma, sans-serif;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0b1f3a;
+  --chart-grid: rgba(11, 31, 58, 0.08);
+  --chart-axis: rgba(11, 31, 58, 0.16);
+  --chart-tick: #3d4a5f;
+  --chart-label: #0b1f3a;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: rgba(11, 31, 58, 0.12);
+  --chart-cursor: rgba(17, 69, 126, 0.06);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --background: #0b1220;
+  --foreground: #f1f5f9;
+  --color-bg: #0b1220;
+  --color-bg-subtle: #101a2c;
+  --color-bg-muted: #1a2639;
+  --color-brand: #8ab8ef;
+  --color-brand-hover: #a9cbf4;
+  --color-brand-light: #6fa3e3;
+  --color-surface: #121c2e;
+  --color-surface-hover: #18243a;
+  --color-surface-raised: #1d2a42;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-accent: rgba(138, 184, 239, 0.4);
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #b4bfcf;
+  --color-text-muted: #8f9bb0;
+  --color-success: #4ade80;
+  --color-info: #60a5fa;
+  --color-accent: #8ab8ef;
+  --color-warning: #facc15;
+  --color-error: #f87171;
+  --color-accent-red: #f2545b;
+  --color-teal: #2dd4bf;
+  --color-teal-soft: rgba(45, 212, 191, 0.14);
+  --color-teal-ink: #5eead4;
+  --color-violet: #a78bfa;
+  --color-violet-soft: rgba(167, 139, 250, 0.16);
+  --color-violet-ink: #c4b5fd;
+  --color-gold: #fbbf24;
+  --color-gold-soft: rgba(251, 191, 36, 0.14);
+  --color-gold-ink: #fcd34d;
+  --color-coral: #fb923c;
+  --color-coral-soft: rgba(251, 146, 60, 0.14);
+  --color-coral-ink: #fdba74;
+  --color-sky: #38bdf8;
+  --color-sky-soft: rgba(56, 189, 248, 0.14);
+  --color-sky-ink: #7dd3fc;
+  --color-rose: #fb7185;
+  --color-rose-soft: rgba(251, 113, 133, 0.14);
+  --color-rose-ink: #fda4af;
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-axis: rgba(255, 255, 255, 0.12);
+  --chart-tick: #b4bfcf;
+  --chart-label: #f1f5f9;
+  --chart-tooltip-bg: #121c2e;
+  --chart-tooltip-border: rgba(255, 255, 255, 0.12);
+  --chart-cursor: rgba(138, 184, 239, 0.08);
+  color-scheme: dark;
+}
+
+/*
+ * "Ink" panels: deep-navy blocks (footer, photo heroes) that look the same in
+ * both themes. Re-pointing the tokens inside them turns every existing
+ * text/border/accent utility into its light-on-navy version.
+ */
+.surface-ink {
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.82);
+  --color-text-muted: rgba(255, 255, 255, 0.66);
+  --color-brand: #ffffff;
+  --color-brand-hover: #e3ecf7;
+  --color-border-subtle: rgba(255, 255, 255, 0.16);
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-hover: rgba(255, 255, 255, 0.1);
+  --color-bg: #0b1f3a;
+  background-color: #0b1f3a;
+  color: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+}
+/* Smooth only when someone follows an in-page link (the link has focus).
+   Scrolls made by scripts stay instant, so tools that scroll to an element
+   and then measure it (axe, LambdaTest) don't measure it mid-scroll. */
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/*
+ * Display faces for headings: Zen Antique (English) and Lalezar (Arabic).
+ * Both have a single weight, so headings stay at 400 and the browser never
+ * fakes a bold from font-semibold. Body and interface text stay in the
+ * readable sans faces.
+ */
+h1:not(.font-sans),
+h2:not(.font-sans),
+h3:not(.font-sans),
+.font-display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+[dir="rtl"] h1:not(.font-sans),
+[dir="rtl"] h2:not(.font-sans),
+[dir="rtl"] h3:not(.font-sans),
+[dir="rtl"] .font-display {
+  font-family: var(--font-display-ar);
+  /* Lalezar's tall letters clip at tight line heights. */
+  line-height: 1.5;
+  padding-block: 0.05em;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+[dir="rtl"] body,
+[dir="rtl"] * {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+
+/* Western digits line up in tables and prices. */
+.tabular-nums,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: rgba(17, 69, 126, 0.18);
+  color: inherit;
+}
+
+[data-theme="dark"] ::selection {
+  background: rgba(138, 184, 239, 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Animation safety net: reveal content if Framer Motion whileInView doesn't trigger */
+@keyframes motion-fallback-reveal {
+  to { opacity: 1; transform: none; filter: none; }
+}
+.motion-safe-fallback {
+  animation: motion-fallback-reveal 0s 4s forwards;
+}
+
+/*
+ * No-JavaScript safety net. Framer Motion renders animated elements with an
+ * inline opacity:0 and fades them in from JavaScript. On browsers that can't
+ * run the app (old phones, in-app browsers, blocked scripts) that left whole
+ * pages blank. Until the app has started (MotionFallback adds .hydrated to
+ * <html>), reveal those elements with CSS alone after a short delay.
+ */
+html:not(.hydrated) [style*="opacity:0"],
+html:not(.hydrated) [style*="opacity: 0"] {
+  animation: motion-fallback-reveal 0s 1.2s forwards;
+}
+.motion-revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+}
+
+/*
+ * Pages pad <main> to clear the fixed header. When the breadcrumb bar already
+ * did that, the page starts right below it instead of after a second gap.
+ */
+.breadcrumb-bar + main {
+  padding-top: 1.25rem;
+}
+
+/* Subtle dot grid, used sparingly behind section intros. */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Former decorative effects, kept as no-ops so old class names are harmless. */
+.text-gradient-animate {
+  color: var(--color-brand);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 31, 58, 0.18);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 31, 58, 0.3);
+  background-clip: padding-box;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
+}
+
+/* Smooth language switch transition */
+.lang-transition * {
+  transition: direction 0s, font-family 200ms ease;
+}
+
+/* Staggered entrance for lists */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stagger-children > * {
+  animation: stagger-in 0.35s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Override Framer Motion inline opacity:0 for reduced-motion users */
+  [style*="opacity: 0"],
+  [style*="opacity:0"] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* Help sheet (components/help-sheet.tsx): rises from the bottom on phones,
+   slides in from the side on wider screens. Moves only; never starts hidden. */
+.help-sheet[open] {
+  animation: help-sheet-up 220ms ease-out;
+}
+@keyframes help-sheet-up {
+  from { transform: translateY(24px); opacity: 0.6; }
+}
+@keyframes help-sheet-side {
+  from { transform: translateX(24px); opacity: 0.6; }
+}
+@keyframes help-sheet-side-rtl {
+  from { transform: translateX(-24px); opacity: 0.6; }
+}
+@media (min-width: 48rem) {
+  .help-sheet[open] { animation-name: help-sheet-side; }
+  [dir="rtl"] .help-sheet[open] { animation-name: help-sheet-side-rtl; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .help-sheet[open] { animation: none; }
+}
+
+/* ── Motion system ────────────────────────────────────────────────────
+   Content is always visible: these only move things a little, and only
+   where the browser supports scroll-driven animations. Off with reduced
+   motion. Use .reveal on blocks that enter as you scroll, .card-lift on
+   clickable cards. */
+.card-lift {
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-accent);
+  box-shadow: 0 18px 36px -22px rgba(11, 31, 58, 0.45);
+}
+.card-lift:active {
+  transform: translateY(0);
+}
+.card-lift:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+@keyframes reveal-rise {
+  /* Movement only: text keeps full contrast at every frame. Kept small so a
+     block still rising never covers the one below (contrast checkers flag that). */
+  from { transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-lift, .card-lift:hover { transition: none; transform: none; }
+}
+
+/* City map (components/city-map.tsx): dots breathe, the card rises. */
+@media (prefers-reduced-motion: no-preference) {
+  .map-pulse {
+    animation: map-pulse 2.6s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .map-card {
+    animation: map-card-rise 220ms ease-out;
+  }
+}
+@keyframes map-pulse {
+  50% { transform: scale(1.35); opacity: 0.35; }
+}
+@keyframes map-card-rise {
+  from { transform: translateY(12px); opacity: 0.6; }
+}
+
+/* Score rings fill from empty to their value (eligibility, My Journey). */
+@media (prefers-reduced-motion: no-preference) {
+  .ring-fill {
+    animation: ring-fill 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: 150ms;
+  }
+}
+@keyframes ring-fill {
+  from { stroke-dashoffset: var(--ring); }
+}
+
+/* Stage router: the progress line grows to the visitor's stage. */
+@media (prefers-reduced-motion: no-preference) {
+  .stage-progress {
+    animation: stage-grow 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transform-origin: left;
+  }
+  [dir="rtl"] .stage-progress { transform-origin: right; }
+}
+@keyframes stage-grow {
+  from { transform: scaleX(0.05); }
+}
+
+/* Soft multi-colour wash for section backgrounds (light and dark). */
+.bg-mesh {
+  background:
+    radial-gradient(40rem 22rem at 12% 0%, color-mix(in srgb, var(--color-sky) 14%, transparent), transparent 70%),
+    radial-gradient(34rem 20rem at 88% 10%, color-mix(in srgb, var(--color-violet) 12%, transparent), transparent 70%),
+    radial-gradient(36rem 22rem at 50% 100%, color-mix(in srgb, var(--color-gold) 12%, transparent), transparent 70%),
+    var(--color-bg-subtle);
+}
+/* Decorative blurred colour blobs (aria-hidden spans). */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(48px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .blob { animation: blob-drift 14s ease-in-out infinite alternate; }
+}
+@keyframes blob-drift {
+  to { transform: translate3d(18px, -14px, 0) scale(1.08); }
+}
+
+/* Hero collage cards float gently. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-float { animation: hero-float 7s ease-in-out infinite alternate; }
+}
+@keyframes hero-float {
+  to { translate: 0 -10px; }
+}
+
+/* Photo cards (components/card-photo.tsx): on hover or keyboard focus the
+   photo eases in a little and a soft sheen crosses it. The card itself rises
+   with .card-lift. Movement only; nothing appears or disappears. */
+.card-photo-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.22) 50%, transparent 65%);
+  transform: translateX(-110%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card-photo-img {
+    transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .group:hover .card-photo-img,
+  .group:focus-within .card-photo-img {
+    transform: scale(1.06);
+  }
+  .group:hover .card-photo-shine,
+  .group:focus-within .card-photo-shine {
+    transform: translateX(110%);
+    transition: transform 900ms ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-photo-shine { display: none; }
+}
+
+/* Days-left ring on deadline cards fills from empty to its value. */
+@media (prefers-reduced-motion: no-preference) {
+  .days-ring {
+    animation: ring-fill 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-timeline: view();
+    animation-range: entry 10% entry 70%;
+  }
+  @supports not (animation-timeline: view()) {
+    .days-ring { animation-timeline: auto; animation-delay: 150ms; }
+  }
+}
+
+/* Step numbers drawn from data-n: a lone digit as text reads to contrast
+   checkers like an icon glyph they can't judge. */
+.step-num::before {
+  content: attr(data-n);
+}
+
+/* ------------------------------------------------------------------------
+ * Cost of living (src/components/living/*)
+ * Chart colours: validated with the dataviz palette checker (lightness band,
+ * colour-blind separation) on the light surface and, separately, on the dark
+ * surface. Order is fixed: housing, food, transport, bills, fun, personal.
+ * ---------------------------------------------------------------------- */
+:root {
+  --viz-1: #2d64a5;
+  --viz-2: #f59e0b;
+  --viz-3: #0d9488;
+  --viz-4: #f97316;
+  --viz-5: #7c3aed;
+  --viz-6: #e11d48;
+  /* Text on each segment colour, AA in this theme. */
+  --viz-1-text: #ffffff;
+  --viz-2-text: #0b1f3a;
+  --viz-3-text: #000000;
+  --viz-4-text: #0b1f3a;
+  --viz-5-text: #ffffff;
+  --viz-6-text: #ffffff;
+  --receipt: #fffdf7;
+  --receipt-ink: #1f2937;
+  --receipt-rule: rgba(31, 41, 55, 0.28);
+}
+[data-theme="dark"] {
+  --viz-1: #5b8fd4;
+  --viz-2: #bb800a;
+  --viz-3: #0fa394;
+  --viz-4: #e06a1c;
+  --viz-5: #9a76f0;
+  --viz-6: #f0506e;
+  --viz-1-text: #0b1220;
+  --viz-2-text: #0b1220;
+  --viz-3-text: #0b1220;
+  --viz-4-text: #0b1220;
+  --viz-5-text: #0b1220;
+  --viz-6-text: #0b1220;
+  --receipt: #18233a;
+  --receipt-ink: #f1f5f9;
+  --receipt-rule: rgba(241, 245, 249, 0.3);
+}
+
+/* Native range input, restyled (thumb, track, filled part, focus). The page
+   sets --fill (0–100%) inline; WebKit has no "progress" pseudo-element. */
+.range {
+  --track: 0.5rem;
+  --thumb: 1.5rem;
+  --fill-color: var(--color-brand);
+  --track-color: var(--color-bg-muted);
+  --dir: to right;
+  appearance: none;
+  inline-size: 100%;
+  block-size: 2.75rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+[dir="rtl"] .range { --dir: to left; }
+.range::-webkit-slider-runnable-track {
+  block-size: var(--track);
+  border-radius: 999px;
+  background: linear-gradient(var(--dir), var(--fill-color) var(--fill, 50%), var(--track-color) var(--fill, 50%));
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: var(--thumb);
+  block-size: var(--thumb);
+  margin-block-start: calc((var(--track) - var(--thumb)) / 2);
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  background: var(--fill-color);
+  box-shadow: 0 1px 4px rgba(11, 31, 58, 0.35);
+}
+.range::-moz-range-track {
+  block-size: var(--track);
+  border-radius: 999px;
+  background: var(--track-color);
+}
+.range::-moz-range-progress {
+  block-size: var(--track);
+  border-radius: 999px;
+  background: var(--fill-color);
+}
+.range::-moz-range-thumb {
+  inline-size: var(--thumb);
+  block-size: var(--thumb);
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  background: var(--fill-color);
+}
+.range:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* The till receipt beside the basket. */
+.receipt {
+  background: var(--receipt);
+  color: var(--receipt-ink);
+  --color-text-primary: var(--receipt-ink);
+  -webkit-mask: radial-gradient(circle 6px at 50% 0, #0000 98%, #000) 50% 0 / 18px 51% repeat-x,
+    radial-gradient(circle 6px at 50% 100%, #0000 98%, #000) 50% 100% / 18px 51% repeat-x;
+  mask: radial-gradient(circle 6px at 50% 0, #0000 98%, #000) 50% 0 / 18px 51% repeat-x,
+    radial-gradient(circle 6px at 50% 100%, #0000 98%, #000) 50% 100% / 18px 51% repeat-x;
+}
+.receipt-rule { border-top: 2px dashed var(--receipt-rule); }
+
+/* Bars and meters grow from their start edge; content is never hidden. */
+.grow-x {
+  transform-origin: left center;
+  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+[dir="rtl"] .grow-x { transform-origin: right center; }
+.seg { transition: flex-grow 450ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@media (prefers-reduced-motion: no-preference) {
+  .pop { animation: pop-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+}
+@keyframes pop-in {
+  from { transform: scale(0.85); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grow-x, .seg { transition: none; }
+}
