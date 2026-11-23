@@ -1,0 +1,69 @@
+[build]
+  command = "node tools/fetch-course-content.mjs && npm run build"
+  publish = "out"
+
+# Paid course content, downloaded at build time (never in the repo or out/).
+[functions]
+  included_files = ["netlify/course-content/**"]
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_VERSION = "10"
+
+[[redirects]]
+  from = "https://studyczechia.netlify.app/*"
+  to = "https://studyczechia.com/:splat"
+  status = 301
+  force = true
+
+# City pages used to drop accented letters (Plzeň -> "plze"). Old URLs now
+# redirect permanently to the transliterated slugs.
+# Every programme has an entrance exam, so the old "no entrance exam" list
+# was removed. Its URLs now point to the full programme list.
+[[redirects]]
+  from = "/study/no-entrance-exam/"
+  to = "/programmes/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ar/study/no-entrance-exam/"
+  to = "/ar/programmes/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-zl-n/"
+  to = "/study/in-zlin/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-plze/"
+  to = "/study/in-plzen/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-hradec-kr-lov/"
+  to = "/study/in-hradec-kralove/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-st-nad-labem/"
+  to = "/study/in-usti-nad-labem/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-esk-bud-jovice/"
+  to = "/study/in-ceske-budejovice/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/study/in-mlad-boleslav/"
+  to = "/study/in-mlada-boleslav/"
+  status = 301
+  force = true

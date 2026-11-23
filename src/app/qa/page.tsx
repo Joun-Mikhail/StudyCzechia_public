@@ -1,0 +1,200 @@
+﻿"use client";
+
+import { useMemo, useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/i18n/context";
+import { Navbar } from "@/components/navbar";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Footer } from "@/components/footer";
+import { qaEntries, qaCategories, type QaEntry } from "@/data/qa";
+import { motion } from "framer-motion";
+import { Search, ChevronDown, ShieldCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { VerifiedBadge } from "@/components/ui/verified-badge";
+import { slugify } from "@/lib/seo-utils";
+
+// Every entry already carries a hand-picked, stable id (e.g.
+// "bank-minimum-amount") used as its anchor. These predate this ticket and
+// are also referenced by src/data/stages.ts (Ticket 7's stage pages filter
+// qaEntries by these exact ids) -- changing them would silently break those
+// pages and any link already shared on WhatsApp/Facebook. slugify() (from
+// seo-utils, already used elsewhere for field/city slugs) is the fallback
+// for any future entry added without a curated id, so anchors stay
+// human-readable even if nobody picks one by hand.
+function anchorIdFor(entry: QaEntry): string {
+  return entry.id || slugify(entry.q.en);
+}
+
+// Answer text stays permanently mounted (never conditionally rendered) so it's
+// present in the server-rendered HTML and indexable even without JS running —
+// only the visual height/opacity animate on toggle.
+function AccordionItem({ entry, locale }: { entry: QaEntry; locale: "en" | "ar" }) {
+  const anchorId = anchorIdFor(entry);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === `#${anchorId}`) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reads the URL hash after mount
+      setOpen(true);
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    // Only check on first mount -- this is a one-time "did I arrive via a
+    // direct link" check, not a live hash-change listener.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      id={anchorId}
+      ref={ref}
+      className="rounded-2xl border border-border-subtle bg-surface/60 overflow-hidden scroll-mt-24"
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-start hover:bg-white/[0.03] transition-colors"
+      >
+        <span className="font-medium text-text-primary">{entry.q[locale]}</span>
+        <ChevronDown
+          className={cn(
+            "w-5 h-5 shrink-0 text-text-muted transition-transform duration-300",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
+        className="overflow-hidden"
+      >
+        <div className="px-5 pb-5">
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {entry.a[locale]}
+          </p>
+          {entry.source && (
+            <a
+              href={entry.source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-3 text-xs text-text-muted hover:text-text-secondary underline underline-offset-2"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-success" />
+              {locale === "ar" ? "المصدر:" : "Source:"} {entry.source.label[locale]}
+            </a>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+export default function QaPage() {
+  const { t, locale } = useTranslation();
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<QaEntry["category"] | "all">("all");
+
+  const filtered = useMemo(() => {
+    return qaEntries.filter((entry) => {
+      const matchesCategory = category === "all" || entry.category === category;
+      const q = query.trim().toLowerCase();
+      const matchesQuery =
+        !q ||
+        entry.q[locale].toLowerCase().includes(q) ||
+        entry.a[locale].toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
+    });
+  }, [query, category, locale]);
+
+  return (
+    <div className="relative min-h-screen">
+      <Navbar />
+      <Breadcrumb />
+
+      <main id="main-content" className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+        {/* Hero banner */}
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="relative w-full h-[130px] sm:h-[170px] rounded-2xl overflow-hidden">
+            <Image
+              src="/images/study/library-aisle.jpg"
+              alt=""
+              fill
+              loading="eager"
+              fetchPriority="high"
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+          </div>
+        </div>
+        <div className="max-w-3xl mx-auto text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3">
+            {t.qa.title}
+          </h1>
+          <p className="text-text-secondary leading-relaxed">{t.qa.subtitle}</p>
+          <div className="mt-3 flex justify-center">
+            <VerifiedBadge
+              date="2026-08-27"
+              label={locale === "ar" ? "آخر مراجعة:" : "Last reviewed:"}
+              sourceUrl="https://ipc.gov.cz/en/visa-and-residence-permit-types/third-country-nationals/"
+            />
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="relative">
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t.qa.searchPlaceholder}
+              className="w-full ps-11 pe-4 py-3 rounded-xl bg-surface border border-border-subtle text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand/40 transition-colors"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            <button
+              onClick={() => setCategory("all")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-sm border transition-colors",
+                category === "all"
+                  ? "bg-brand text-bg border-brand font-medium"
+                  : "border-border-subtle text-text-secondary hover:text-text-primary hover:border-brand/30"
+              )}
+            >
+              {t.qa.allCategories}
+            </button>
+            {qaCategories.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-sm border transition-colors",
+                  category === c.key
+                    ? "bg-brand text-bg border-brand font-medium"
+                    : "border-border-subtle text-text-secondary hover:text-text-primary hover:border-brand/30"
+                )}
+              >
+                {c.label[locale]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto space-y-3">
+          {filtered.length === 0 ? (
+            <p className="text-center text-text-muted py-12">{t.qa.noResults}</p>
+          ) : (
+            filtered.map((entry) => (
+              <AccordionItem key={entry.id} entry={entry} locale={locale} />
+            ))
+          )}
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
